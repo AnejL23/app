@@ -30,7 +30,7 @@ export const languages = [
         color: "#F9F4DA",
     },
     {
-        name: "Forarms",
+        name: "Forearms",
         backgroundColor: "#FFD742",
         color: "#1E1E1E",
     },

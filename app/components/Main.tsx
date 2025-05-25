@@ -94,7 +94,7 @@ export default function Main() {
                 className={clsx(
                     "bg-gray-500 w-10 h-10 flex items-center justify-center border-b-4 border-white",
                     {
-                        "text-red-500": isGameLost && !guessedLetters.includes(letter)
+                        "text-red-800": isGameLost && !guessedLetters.includes(letter)
                     }
                 )}
                 key={index}
