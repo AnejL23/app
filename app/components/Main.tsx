@@ -1,65 +1,180 @@
 'use client'
 
 import { languages } from ".././data"
-import { useState } from "react"
+import { getFarewellText, getRandomWord } from ".././utils"
+import { useState, useEffect } from "react"
+import clsx from "clsx"
 
 export default function Main() {
+    const [currentWord, setCurrentWord] = useState("")
+    const [guessedLetters, setGuessedLetters] = useState<string[]>([])
+    const [isClient, setIsClient] = useState(false)
 
-const [currentWord, setCurrentWord] = useState("protein")
+    useEffect(() => {
+        setIsClient(true)
+        setCurrentWord(getRandomWord())
+    }, [])
 
+    // Derived values
+    const numGuessesLeft = languages.length - 1
+    const wrongGuessCount = guessedLetters.filter(letter => !currentWord.includes(letter)).length
+    const isGameWon = currentWord.split("").every(letter => guessedLetters.includes(letter))
+    const isGameLost = wrongGuessCount >= numGuessesLeft
+    const isGameOver = isGameWon || isGameLost
+    const lastGuessedLetter = guessedLetters[guessedLetters.length - 1]
+    const isLastGuessIncorrect = lastGuessedLetter && !currentWord.includes(lastGuessedLetter)
 
-const alphabet = "abcdefghijklmnopqrstuvwxyz"
+    const alphabet = "abcdefghijklmnopqrstuvwxyz"
 
-const alphabetElements = alphabet.split("").map((alph) => {
-    return <button key={alph} className="bg-orange-500 text-3xl w-10 h-10 
-    rounded-lg hover:bg-orange-600 transition-colors border-white border-solid">{alph.toUpperCase()}</button>
-})
+    function addGuessedLetter(letter: string) {
+        setGuessedLetters(prevLetter => 
+            prevLetter.includes(letter) ? 
+            prevLetter : [...prevLetter, letter])
+    }
 
+    function startNewGame() {
+        setCurrentWord(getRandomWord())
+        setGuessedLetters([])
+    }
 
-const languageElements = languages.map((lang) => {
-    return (
-        <span 
-            style={{backgroundColor: lang.backgroundColor, color: lang.color}} 
-            key={lang.name}
-            className="px-4 py-1 rounded-lg"
-        >
-            {lang.name}
-        </span>
-    )
-})
+    const alphabetElements = alphabet.split("").map((alph) => {
+        const isGuessed = guessedLetters.includes(alph)
+        const isCorrect = isGuessed && currentWord.includes(alph)
+        const isWrong = isGuessed && !currentWord.includes(alph)
 
-const wordElements = currentWord.split("").map((letter, index) => {
-    return(
-        <span 
-            className="bg-gray-500 w-10 h-10 flex items-center justify-center border-b-4 border-white" 
-            key={index}
-        >
-            {letter.toUpperCase()}
-        </span>
-    )
-})
+        return (
+            <button 
+                disabled={isGameOver}
+                aria-disabled={guessedLetters.includes(alph)}
+                aria-label={`Letter ${alph}`}
+                onClick={() => addGuessedLetter(alph)}
+                key={alph} 
+                className={clsx(
+                    "text-3xl w-10 h-10 rounded-lg transition-colors border-white border-solid",
+                    {
+                        "bg-green-600 hover:bg-green-500": isCorrect,
+                        "bg-red-600 hover:bg-red-300": isWrong,
+                        "bg-orange-500 hover:bg-orange-300": !isGuessed,
+                        "opacity-50 cursor-not-allowed": isGameOver
+                    }
+                )}
+            >
+                {alph.toUpperCase()}
+            </button>
+        )
+    })
+
+    const languageElements = languages.map((lang, index) => {
+        const isLanguageLost = index < wrongGuessCount
+        return (
+            <span 
+                style={{backgroundColor: lang.backgroundColor, color: lang.color}} 
+                key={lang.name}
+                className={clsx(
+                    "px-4 py-1 rounded-lg relative",
+                    {
+                        "lost": isLanguageLost
+                    }
+                )}
+            >
+                {lang.name}
+                {isLanguageLost && (
+                    <span className="absolute inset-0 flex items-center justify-center text-sm bg-black/70 rounded-lg">
+                        💀
+                    </span>
+                )}
+            </span>
+        )
+    })
+
+    const letterElements = currentWord.split("").map((letter, index) => {
+        const shouldRevealLetter = isGameLost || guessedLetters.includes(letter)
+        return(
+            <span 
+                className={clsx(
+                    "bg-gray-500 w-10 h-10 flex items-center justify-center border-b-4 border-white",
+                    {
+                        "text-red-500": isGameLost && !guessedLetters.includes(letter)
+                    }
+                )}
+                key={index}
+            >
+                {shouldRevealLetter ? letter.toUpperCase() : ""}
+            </span>
+        )
+    })
+
+    function renderGameStatus() {
+        if (!isGameOver && isLastGuessIncorrect) {
+            return (
+                <p className="farewell-message">
+                    {getFarewellText(languages[wrongGuessCount - 1].name)}
+                </p>
+            )
+        }
+
+        if (isGameWon) {
+            return (
+                <>
+                    <h2>You win!</h2>
+                    <p>Well done! 🎉</p>
+                </>
+            )
+        }
+        if (isGameLost) {
+            return (
+                <>
+                    <h2>Game over!</h2>
+                    <p>You lose! Better start doing Cardio 😭</p>
+                </>
+            )
+        }
+
+        return null
+    }
 
 
     return (
         <main className="flex flex-col items-center text-center mt-10">
-            <header className="max-w-md">
-                <h1 className="text-white text-2xl font-bold">Fittnes: EndGame</h1>
-                <p className="text-gray-500">Guess the word under 8 attempts to keep 
-                    the fittnes stuff safe from cardio</p>
-            </header>
-            <section className="bg-green-500 w-full max-w-md text-white font-bold p-5 mt-4 rounded-xl">
-                <h2>You Win!</h2>
-                <p>Start a new game</p>
-            </section>
-            <section className="mt-10 flex flex-wrap justify-center gap-2 max-w-xl">
-                {languageElements}
-            </section>
-            <section className="gap-2 text-white text-2xl flex mt-10">
-                {wordElements}
-            </section>
-            <section className="gap-2 flex flex-wrap justify-center mt-10 max-w-lg">
-                {alphabetElements}
-            </section>
+            {isClient ? (
+                <>
+                    <header className="max-w-md">
+                        <h1 className="text-white text-2xl font-bold">Fittnes: EndGame</h1>
+                        <p className="text-gray-500">Guess the word under 8 attempts to keep 
+                            the fittnes community safe from cardio</p>
+                    </header>
+                    <section className={clsx(
+                        "w-full max-w-md text-white font-bold p-5 mt-4 rounded-xl min-h-[100px]",
+                        {
+                            "bg-green-500": isGameWon,
+                            "bg-red-500": isGameLost,
+                            "bg-purple-500": !isGameOver && isLastGuessIncorrect,
+                            "invisible": !isGameOver && !isLastGuessIncorrect
+                        }
+                    )}>
+                        {renderGameStatus()}
+                    </section>
+                    <section className="mt-10 flex flex-wrap justify-center gap-2 max-w-xl">
+                        {languageElements}
+                    </section>
+                    <section className="gap-2 text-white text-2xl flex mt-10">
+                        {letterElements}
+                    </section>
+                    <section className="gap-2 flex flex-wrap justify-center mt-10 max-w-lg">
+                        {alphabetElements}
+                    </section>
+                    {isGameOver && (
+                        <button 
+                            onClick={startNewGame}
+                            className="mt-8 px-6 py-3 bg-green-500 text-white font-bold rounded-lg hover:bg-green-600 transition-colors text-xl"
+                        >
+                            New Game
+                        </button>
+                    )}
+                </>
+            ) : (
+                <div>Loading...</div>
+            )}
         </main>
     )
 }
