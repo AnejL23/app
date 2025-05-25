@@ -1,9 +1,10 @@
 'use client'
 
-import { languages } from ".././data"
-import { getFarewellText, getRandomWord } from ".././utils"
+import { languages } from "../utils/data/laguage"
+import { getFarewellText, getRandomWord } from "../utils/data/message"
 import { useState, useEffect } from "react"
 import clsx from "clsx"
+import Header from "./Header"
 
 export default function Main() {
     const [currentWord, setCurrentWord] = useState("")
@@ -138,11 +139,7 @@ export default function Main() {
         <main className="flex flex-col items-center text-center mt-10">
             {isClient ? (
                 <>
-                    <header className="max-w-md">
-                        <h1 className="text-white text-2xl font-bold">Fittnes: EndGame</h1>
-                        <p className="text-gray-500">Guess the word under 8 attempts to keep 
-                            the fitness community safe from cardio</p>
-                    </header>
+                    <Header />
                     <section className={clsx(
                         "w-full max-w-md text-white text-2xl font-bold p-8 mt-4 rounded-xl min-h-[100px]",
                         {
@@ -152,7 +149,7 @@ export default function Main() {
                             "invisible": !isGameOver && !isLastGuessIncorrect
                         }
                     )}>
-                        {renderGameStatus()}
+                        {renderGameStatus()}--
                     </section>
                     <section className="mt-10 flex flex-wrap justify-center gap-2 max-w-xl">
                         {languageElements}
