@@ -1,15 +1,19 @@
 'use client'
 
-import { languages } from "../utils/data/laguage"
-import { getFarewellText, getRandomWord } from "../utils/data/message"
+import { languages } from "./utils/data/laguage"
+import { getFarewellText, getRandomWord } from "./utils/data/message"
 import { useState, useEffect } from "react"
+import Confetti from 'react-confetti'
 import clsx from "clsx"
 import Header from "./Header"
+import Timer from "./Timer"
 
 export default function Main() {
     const [currentWord, setCurrentWord] = useState("")
     const [guessedLetters, setGuessedLetters] = useState<string[]>([])
     const [isClient, setIsClient] = useState(false)
+    const [hasTimerExpired, setHasTimerExpired] = useState(false)
+    const [time, setTime] = useState(60)
 
     useEffect(() => {
         setIsClient(true)
@@ -20,10 +24,11 @@ export default function Main() {
     const numGuessesLeft = languages.length - 1
     const wrongGuessCount = guessedLetters.filter(letter => !currentWord.includes(letter)).length
     const isGameWon = currentWord.split("").every(letter => guessedLetters.includes(letter))
-    const isGameLost = wrongGuessCount >= numGuessesLeft
+    const isGameLost = wrongGuessCount >= numGuessesLeft || hasTimerExpired
     const isGameOver = isGameWon || isGameLost
     const lastGuessedLetter = guessedLetters[guessedLetters.length - 1]
     const isLastGuessIncorrect = lastGuessedLetter && !currentWord.includes(lastGuessedLetter)
+    
 
     const alphabet = "abcdefghijklmnopqrstuvwxyz"
 
@@ -36,6 +41,8 @@ export default function Main() {
     function startNewGame() {
         setCurrentWord(getRandomWord())
         setGuessedLetters([])
+        setHasTimerExpired(false)
+        setTime(60)
     }
 
     const alphabetElements = alphabet.split("").map((alph) => {
@@ -135,11 +142,36 @@ export default function Main() {
     }
 
 
+    useEffect(() => {
+        if (isGameLost || isGameWon || time === 0) return;
+    
+        const interval = setInterval(() => {
+            setTime(prev => {
+                if (prev <= 1) {
+                    clearInterval(interval);
+                    onGameOver()
+                    return 0;
+                }
+                return prev - 1;
+            })
+        }, 1000);
+    
+        return () => clearInterval(interval);
+    }, [isGameLost, isGameWon, time]);
+    
+
     return (
         <main className="flex flex-col items-center text-center mt-10">
             {isClient ? (
                 <>
+                    {isGameWon && <Confetti />}
                     <Header />
+                    <Timer 
+                        isGameWon={isGameWon}
+                        isGameLost={isGameLost}
+                        time={time}
+                        onGameOver={() => setHasTimerExpired(true)}
+                    />
                     <section className={clsx(
                         "w-full max-w-md text-white text-2xl font-bold p-8 mt-4 rounded-xl min-h-[100px]",
                         {
@@ -149,7 +181,7 @@ export default function Main() {
                             "invisible": !isGameOver && !isLastGuessIncorrect
                         }
                     )}>
-                        {renderGameStatus()}--
+                        {renderGameStatus()}
                     </section>
                     <section className="mt-10 flex flex-wrap justify-center gap-2 max-w-xl">
                         {languageElements}
