@@ -141,7 +141,7 @@ export default function Main() {
                     <header className="max-w-md">
                         <h1 className="text-white text-2xl font-bold">Fittnes: EndGame</h1>
                         <p className="text-gray-500">Guess the word under 8 attempts to keep 
-                            the fittnes community safe from cardio</p>
+                            the fitness community safe from cardio</p>
                     </header>
                     <section className={clsx(
                         "w-full max-w-md text-white text-2xl font-bold p-8 mt-4 rounded-xl min-h-[100px]",
