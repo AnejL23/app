@@ -107,7 +107,7 @@ export default function Main() {
     function renderGameStatus() {
         if (!isGameOver && isLastGuessIncorrect) {
             return (
-                <p className="farewell-message">
+                <p className="">
                     {getFarewellText(languages[wrongGuessCount - 1].name)}
                 </p>
             )
@@ -144,7 +144,7 @@ export default function Main() {
                             the fittnes community safe from cardio</p>
                     </header>
                     <section className={clsx(
-                        "w-full max-w-md text-white font-bold p-5 mt-4 rounded-xl min-h-[100px]",
+                        "w-full max-w-md text-white text-2xl font-bold p-8 mt-4 rounded-xl min-h-[100px]",
                         {
                             "bg-green-500": isGameWon,
                             "bg-red-500": isGameLost,
