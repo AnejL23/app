@@ -1,7 +1,7 @@
 'use client'
 
-import { languages } from "./utils/data/laguage.js"
-import { getFarewellText, getRandomWord } from "./utils/data/message.js"
+import { languages } from "./utils/data/laguage"
+import { getFarewellText, getRandomWord } from "./utils/data/message"
 import { useState, useEffect } from "react"
 import Confetti from 'react-confetti'
 import clsx from "clsx"
