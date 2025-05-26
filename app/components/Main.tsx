@@ -1,7 +1,7 @@
 'use client'
 
-import { languages } from "./utils/data/laguage"
-import { getFarewellText, getRandomWord } from "./utils/data/message"
+import { languages } from "./utils/data/laguage.js"
+import { getFarewellText, getRandomWord } from "./utils/data/message.js"
 import { useState, useEffect } from "react"
 import Confetti from 'react-confetti'
 import clsx from "clsx"
@@ -149,7 +149,7 @@ export default function Main() {
             setTime(prev => {
                 if (prev <= 1) {
                     clearInterval(interval);
-                    onGameOver()
+                    setHasTimerExpired(true);
                     return 0;
                 }
                 return prev - 1;
@@ -167,10 +167,7 @@ export default function Main() {
                     {isGameWon && <Confetti />}
                     <Header />
                     <Timer 
-                        isGameWon={isGameWon}
-                        isGameLost={isGameLost}
                         time={time}
-                        onGameOver={() => setHasTimerExpired(true)}
                     />
                     <section className={clsx(
                         "w-full max-w-md text-white text-2xl font-bold p-8 mt-4 rounded-xl min-h-[100px]",
